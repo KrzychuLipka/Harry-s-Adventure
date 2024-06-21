@@ -30,6 +30,7 @@ class GameTemplate extends FlameGame
       spriteUp1: await loadSprite('hurry_up_1.png'),
       spriteUp2: await loadSprite('hurry_up_2.png'),
       spriteUp3: await loadSprite('hurry_up_3.png'),
+      depthSprite: await loadSprite('hdeath.png'),
     ));
     add(mutant = Mutant(
       spriteDown1: await loadSprite('md1.png'),

@@ -1,49 +1,69 @@
+import 'dart:async';
+
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_game/game_template.dart';
 import 'package:flutter_game/model/vertical_direction.dart';
+import 'package:flutter_game/sprites/mutant.dart';
 
 class Harry extends SpriteComponent
     with HasGameRef<GameTemplate>, CollisionCallbacks {
-  final spriteVelocity = 700;
-  double screenPosition = 0;
-  double timeSinceLastUpdate = 0;
-  int rightClickCounter = 0;
-  int leftClickCounter = 0;
-  int downClickCounter = 0;
-  int upClickCounter = 0;
-  bool isCollision = false;
-  Sprite spriteRight1;
-  Sprite spriteRight2;
-  Sprite spriteRight3;
-  Sprite spriteLeft1;
-  Sprite spriteLeft2;
-  Sprite spriteLeft3;
-  Sprite spriteDown1;
-  Sprite spriteDown2;
-  Sprite spriteDown3;
-  Sprite spriteUp1;
-  Sprite spriteUp2;
-  Sprite spriteUp3;
+  static const String _mainThemeAudioFileName = 'main_theme.wav';
+  static const String _screamAudioFileName = 'scream.wav';
+  static const _spriteVelocity = 700;
+  final Sprite _spriteRight1;
+  final Sprite _spriteRight2;
+  final Sprite _spriteRight3;
+  final Sprite _spriteLeft1;
+  final Sprite _spriteLeft2;
+  final Sprite _spriteLeft3;
+  final Sprite _spriteDown1;
+  final Sprite _spriteDown2;
+  final Sprite _spriteDown3;
+  final Sprite _spriteUp1;
+  final Sprite _spriteUp2;
+  final Sprite _spriteUp3;
+  final Sprite _depthSprite;
   MovementDirection _activeDirection = MovementDirection.none;
   MovementDirection _prevDirection = MovementDirection.none;
+  double _screenPosition = 0;
+  double _timeSinceLastUpdate = 0;
+  int _rightClickCounter = 0;
+  int _leftClickCounter = 0;
+  int _downClickCounter = 0;
+  int _upClickCounter = 0;
+  bool _isScreamPlaying = false;
 
   Harry({
-    required this.spriteRight1,
-    required this.spriteRight2,
-    required this.spriteRight3,
-    required this.spriteLeft1,
-    required this.spriteLeft2,
-    required this.spriteLeft3,
-    required this.spriteDown1,
-    required this.spriteDown2,
-    required this.spriteDown3,
-    required this.spriteUp1,
-    required this.spriteUp2,
-    required this.spriteUp3,
-  }) {
-    sprite = spriteRight2;
+    required Sprite spriteRight1,
+    required Sprite spriteRight2,
+    required Sprite spriteRight3,
+    required Sprite spriteLeft1,
+    required Sprite spriteLeft2,
+    required Sprite spriteLeft3,
+    required Sprite spriteDown1,
+    required Sprite spriteDown2,
+    required Sprite spriteDown3,
+    required Sprite spriteUp1,
+    required Sprite spriteUp2,
+    required Sprite spriteUp3,
+    required Sprite depthSprite,
+  })  : _depthSprite = depthSprite,
+        _spriteUp3 = spriteUp3,
+        _spriteUp2 = spriteUp2,
+        _spriteUp1 = spriteUp1,
+        _spriteDown3 = spriteDown3,
+        _spriteDown2 = spriteDown2,
+        _spriteDown1 = spriteDown1,
+        _spriteLeft3 = spriteLeft3,
+        _spriteLeft2 = spriteLeft2,
+        _spriteLeft1 = spriteLeft1,
+        _spriteRight3 = spriteRight3,
+        _spriteRight2 = spriteRight2,
+        _spriteRight1 = spriteRight1 {
+    sprite = _spriteRight2;
     size = Vector2(72, 142);
     anchor = Anchor.center;
     position = Vector2(100, 400);
@@ -69,10 +89,21 @@ class Harry extends SpriteComponent
   }
 
   @override
+  FutureOr<void> onLoad() async {
+    super.onLoad();
+    await FlameAudio.audioCache.loadAll([
+      _mainThemeAudioFileName,
+      _screamAudioFileName,
+    ]);
+    FlameAudio.bgm.initialize();
+    FlameAudio.bgm.play(_mainThemeAudioFileName);
+  }
+
+  @override
   void update(double dt) {
     super.update(dt);
-    timeSinceLastUpdate += dt;
-    if (timeSinceLastUpdate < 0.15) return;
+    _timeSinceLastUpdate += dt;
+    if (_timeSinceLastUpdate < 0.15) return;
     switch (_activeDirection) {
       case MovementDirection.left:
         _handleLeftClick(dt);
@@ -92,29 +123,30 @@ class Harry extends SpriteComponent
     }
     _prevDirection = _activeDirection;
     _activeDirection = MovementDirection.none;
-    timeSinceLastUpdate = 0;
+    _timeSinceLastUpdate = 0;
+    _isScreamPlaying = false;
   }
 
   void _handleLeftClick(
     double dt,
   ) {
-    screenPosition = position.x - spriteVelocity * dt;
-    if (screenPosition > 0) {
-      position.x = screenPosition;
-      switch (++leftClickCounter) {
+    _screenPosition = position.x - _spriteVelocity * dt;
+    if (_screenPosition > 0) {
+      position.x = _screenPosition;
+      switch (++_leftClickCounter) {
         case 1:
-          sprite = spriteLeft1;
+          sprite = _spriteLeft1;
           break;
         case 2:
         case 4:
-          sprite = spriteLeft2;
+          sprite = _spriteLeft2;
           break;
         case 3:
-          sprite = spriteLeft3;
+          sprite = _spriteLeft3;
           break;
       }
-      if (leftClickCounter == 4) {
-        leftClickCounter = 0;
+      if (_leftClickCounter == 4) {
+        _leftClickCounter = 0;
       }
     } else {
       position.x = gameRef.size.x;
@@ -124,23 +156,23 @@ class Harry extends SpriteComponent
   void _handleRightClick(
     double dt,
   ) {
-    screenPosition = position.x + spriteVelocity * dt;
-    if (screenPosition < gameRef.size.x) {
-      position.x = screenPosition;
-      switch (++rightClickCounter) {
+    _screenPosition = position.x + _spriteVelocity * dt;
+    if (_screenPosition < gameRef.size.x) {
+      position.x = _screenPosition;
+      switch (++_rightClickCounter) {
         case 1:
-          sprite = spriteRight1;
+          sprite = _spriteRight1;
           break;
         case 2:
         case 4:
-          sprite = spriteRight2;
+          sprite = _spriteRight2;
           break;
         case 3:
-          sprite = spriteRight3;
+          sprite = _spriteRight3;
           break;
       }
-      if (rightClickCounter == 4) {
-        rightClickCounter = 0;
+      if (_rightClickCounter == 4) {
+        _rightClickCounter = 0;
       }
     } else {
       position.x = 0;
@@ -150,23 +182,23 @@ class Harry extends SpriteComponent
   void _handleDownClick(
     double dt,
   ) {
-    screenPosition = position.y + spriteVelocity * dt;
-    if (screenPosition < gameRef.size.y) {
-      position.y = screenPosition;
-      switch (++downClickCounter) {
+    _screenPosition = position.y + _spriteVelocity * dt;
+    if (_screenPosition < gameRef.size.y) {
+      position.y = _screenPosition;
+      switch (++_downClickCounter) {
         case 1:
-          sprite = spriteDown1;
+          sprite = _spriteDown1;
           break;
         case 2:
         case 4:
-          sprite = spriteDown2;
+          sprite = _spriteDown2;
           break;
         case 3:
-          sprite = spriteDown3;
+          sprite = _spriteDown3;
           break;
       }
-      if (downClickCounter == 4) {
-        downClickCounter = 0;
+      if (_downClickCounter == 4) {
+        _downClickCounter = 0;
       }
     } else {
       position.y = 0;
@@ -176,23 +208,23 @@ class Harry extends SpriteComponent
   void _handleUpClick(
     double dt,
   ) {
-    screenPosition = position.y - spriteVelocity * dt;
-    if (screenPosition > 0) {
-      position.y = screenPosition;
-      switch (++upClickCounter) {
+    _screenPosition = position.y - _spriteVelocity * dt;
+    if (_screenPosition > 0) {
+      position.y = _screenPosition;
+      switch (++_upClickCounter) {
         case 1:
-          sprite = spriteUp1;
+          sprite = _spriteUp1;
           break;
         case 2:
         case 4:
-          sprite = spriteUp2;
+          sprite = _spriteUp2;
           break;
         case 3:
-          sprite = spriteUp3;
+          sprite = _spriteUp3;
           break;
       }
-      if (upClickCounter == 4) {
-        upClickCounter = 0;
+      if (_upClickCounter == 4) {
+        _upClickCounter = 0;
       }
     } else {
       position.y = gameRef.size.y;
@@ -202,19 +234,35 @@ class Harry extends SpriteComponent
   void _resetSprite() {
     switch (_prevDirection) {
       case MovementDirection.right:
-        sprite = spriteRight2;
+        sprite = _spriteRight2;
         break;
       case MovementDirection.left:
-        sprite = spriteLeft2;
+        sprite = _spriteLeft2;
         break;
       case MovementDirection.down:
-        sprite = spriteDown2;
+        sprite = _spriteDown2;
         break;
       case MovementDirection.up:
-        sprite = spriteUp2;
+        sprite = _spriteUp2;
         break;
       default:
         break;
+    }
+  }
+
+  @override
+  void onCollision(
+    Set<Vector2> intersectionPoints,
+    PositionComponent other,
+  ) {
+    super.onCollision(intersectionPoints, other);
+    if (other is Mutant) {
+      if (!_isScreamPlaying) {
+        _isScreamPlaying = true;
+        FlameAudio.play(_screamAudioFileName);
+      }
+      sprite = _depthSprite;
+      position.x += 100;
     }
   }
 }
