@@ -54,7 +54,7 @@ class Mutant extends SpriteComponent
     double dt,
   ) {
     _screenPosition = position.y + _spriteVelocity * dt;
-    if (_screenPosition < gameRef.size.y) {
+    if (_screenPosition < gameRef.size.y - height) {
       position.y = _screenPosition;
       switch (++_downClickCounter) {
         case 1:
@@ -72,7 +72,6 @@ class Mutant extends SpriteComponent
       }
     } else {
       _verticalDirection = MovementDirection.up;
-      position.x += 100;
     }
   }
 
@@ -98,7 +97,6 @@ class Mutant extends SpriteComponent
       }
     } else {
       _verticalDirection = MovementDirection.down;
-      position.x -= 100;
     }
   }
 }
