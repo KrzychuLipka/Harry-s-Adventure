@@ -10,7 +10,6 @@ import 'package:flutter_game/sprites/mutant.dart';
 
 class Harry extends SpriteComponent
     with HasGameRef<GameTemplate>, CollisionCallbacks {
-  static const String _mainThemeAudioFileName = 'main_theme.wav';
   static const String _screamAudioFileName = 'scream.wav';
   static const _spriteVelocity = 700;
   final Sprite _spriteRight1;
@@ -66,7 +65,7 @@ class Harry extends SpriteComponent
     sprite = _spriteRight2;
     size = Vector2(72, 142);
     anchor = Anchor.center;
-    position = Vector2(100, 400);
+    position = Vector2(300, 100);
     add(RectangleHitbox());
     add(KeyboardListenerComponent(keyDown: {
       LogicalKeyboardKey.arrowLeft: (kePressed) {
@@ -91,12 +90,7 @@ class Harry extends SpriteComponent
   @override
   FutureOr<void> onLoad() async {
     super.onLoad();
-    await FlameAudio.audioCache.loadAll([
-      _mainThemeAudioFileName,
-      _screamAudioFileName,
-    ]);
-    FlameAudio.bgm.initialize();
-    FlameAudio.bgm.play(_mainThemeAudioFileName);
+    await FlameAudio.audioCache.load(_screamAudioFileName);
   }
 
   @override
@@ -183,7 +177,7 @@ class Harry extends SpriteComponent
     double dt,
   ) {
     _screenPosition = position.y + _spriteVelocity * dt;
-    if (_screenPosition < gameRef.size.y) {
+    if (_screenPosition < gameRef.size.y - 120) {
       position.y = _screenPosition;
       switch (++_downClickCounter) {
         case 1:
@@ -200,8 +194,6 @@ class Harry extends SpriteComponent
       if (_downClickCounter == 4) {
         _downClickCounter = 0;
       }
-    } else {
-      position.y = 0;
     }
   }
 
@@ -209,7 +201,7 @@ class Harry extends SpriteComponent
     double dt,
   ) {
     _screenPosition = position.y - _spriteVelocity * dt;
-    if (_screenPosition > 0) {
+    if (_screenPosition > 50) {
       position.y = _screenPosition;
       switch (++_upClickCounter) {
         case 1:
@@ -226,8 +218,6 @@ class Harry extends SpriteComponent
       if (_upClickCounter == 4) {
         _upClickCounter = 0;
       }
-    } else {
-      position.y = gameRef.size.y;
     }
   }
 

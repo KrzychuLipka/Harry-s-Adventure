@@ -33,7 +33,7 @@ class Mutant extends SpriteComponent
         _spriteDown1 = spriteDown1 {
     sprite = _spriteDown1;
     size = Vector2(64, 137);
-    position = Vector2(50, 100);
+    position = Vector2(200, 100);
     add(RectangleHitbox());
   }
 

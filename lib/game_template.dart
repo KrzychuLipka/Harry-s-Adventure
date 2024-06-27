@@ -4,20 +4,22 @@ import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/game.dart';
 import 'package:flutter_game/sprites/harry.dart';
+import 'package:flutter_game/sprites/level1_layer1.dart';
+import 'package:flutter_game/sprites/level1_layer2.dart';
 import 'package:flutter_game/sprites/mutant.dart';
 
 class GameTemplate extends FlameGame
     with HasKeyboardHandlerComponents, HasCollisionDetection {
-  late Harry harry;
-  late Mutant mutant;
-
   @override
   Color backgroundColor() => const Color(0xFFFFFFFF);
 
   @override
   FutureOr<void> onLoad() async {
     super.onLoad();
-    add(harry = Harry(
+    add(Level1Layer1(
+      sprite: await loadSprite('l1.png'),
+    ));
+    add(Harry(
       spriteRight1: await loadSprite('hr1.png'),
       spriteRight2: await loadSprite('hr2.png'),
       spriteRight3: await loadSprite('hr3.png'),
@@ -32,13 +34,19 @@ class GameTemplate extends FlameGame
       spriteUp3: await loadSprite('hurry_up_3.png'),
       depthSprite: await loadSprite('hdeath.png'),
     ));
-    add(mutant = Mutant(
+    add(Mutant(
       spriteDown1: await loadSprite('md1.png'),
       spriteDown2: await loadSprite('md2.png'),
       spriteDown3: await loadSprite('md3.png'),
       spriteUp1: await loadSprite('mu1.png'),
       spriteUp2: await loadSprite('mu2.png'),
       spriteUp3: await loadSprite('mu3.png'),
+    ));
+    add(Level1Layer2(
+      sprite1: await loadSprite('l1s1.png'),
+      sprite2: await loadSprite('l1s2.png'),
+      sprite3: await loadSprite('l1s3.png'),
+      sprite4: await loadSprite('l1s4.png'),
     ));
   }
 }
